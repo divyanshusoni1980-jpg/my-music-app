@@ -10,38 +10,17 @@
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body { background-color: #0b1329; color: #ffffff; font-family: sans-serif; }
-        .hidden-panel { display: none !important; }
-        /* Smooth Custom Scrollbar for Phone Lists */
         .dynamic-scroll::-webkit-scrollbar { width: 4px; }
         .dynamic-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        .dynamic-scroll::-webkit-scrollbar-thumb { background: #4f46e5; rounded: 10px; }
+        .dynamic-scroll::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- 1. AUTHENTICATION CODE LAYOUT SCREEN -->
-    <div id="auth-mod" class="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl text-center transition-all duration-300">
-        <div class="mb-6 text-indigo-400 text-5xl">
-            <i class="fa-solid fa-lock"></i>
-        </div>
-        <h1 class="text-3xl font-bold mb-2 tracking-tight">NavyStream</h1>
-        <p class="text-slate-400 mb-8 text-sm">Private high-fidelity audio vault. Authorized access only.</p>
+    <!-- MAIN CORE APPLICATION DASHBOARD (Instant Access - No Password Required) -->
+    <div id="main-app" class="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <div class="relative w-full mb-4">
-            <input type="password" id="passcode-input" placeholder="Enter Access Code" 
-                   class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-5 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all text-center tracking-widest text-lg">
-        </div>
-        <div id="auth-error" class="h-6 text-xs text-red-400 font-medium opacity-0 transition-opacity mb-2">Incorrect passcode. Try again.</div>
-        
-        <button onclick="unlockApp()" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold py-3 rounded-xl shadow-lg transition-all">
-            Unlock Player
-        </button>
-    </div>
-
-    <!-- 2. CORE SYSTEM DASHBOARD -->
-    <div id="main-app" class="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 hidden-panel grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <!-- CONTROL PANEL: SOUND EQUALIZER ADJUSTMENT PANELS -->
+        <!-- SIDE PANEL: EQUALIZER MODULES -->
         <div class="bg-slate-950 border border-slate-800/60 p-5 rounded-xl flex flex-col gap-6">
             <div>
                 <h3 class="text-lg font-bold text-slate-200 mb-4"><i class="fa-solid fa-sliders text-indigo-400 mr-2"></i>Customization & EQ</h3>
@@ -51,7 +30,7 @@
                 </div>
             </div>
 
-            <!-- SLIDER LAYOUT SYSTEM -->
+            <!-- EQ SLIDERS SYSTEM -->
             <div class="flex flex-col gap-4">
                 <div>
                     <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Bass</span><span id="bass-val">0 dB</span></div>
@@ -71,7 +50,7 @@
             </p>
         </div>
 
-        <!-- MAIN WINDOW: DYNAMIC CONTENT AND MEDIA SYSTEM -->
+        <!-- MAIN MEDIA PLAYER SECTION -->
         <div class="md:col-span-2 flex flex-col justify-between gap-6">
             <div class="bg-gradient-to-b from-slate-800/40 to-slate-950 p-6 rounded-xl border border-slate-800/50 flex flex-col items-center text-center relative overflow-hidden group">
                 <div id="album-art" class="w-44 h-44 bg-slate-800 rounded-xl shadow-xl flex items-center justify-center text-slate-600 text-6xl mb-4 border border-slate-700/50 transition-all duration-500 group-hover:scale-105">
@@ -80,14 +59,14 @@
                 <h2 id="player-title" class="text-xl font-bold tracking-wide text-slate-100 mb-1">Select a Track</h2>
                 <p id="player-album" class="text-sm text-indigo-400 font-medium mb-4">Private Audio Mix Vault</p>
 
-                <!-- Audio Core Progress Slider Layout -->
+                <!-- Audio Track Timeline Progress Slider Layout -->
                 <div class="w-full flex items-center gap-3 text-xs text-slate-400 mb-4">
                     <span id="curr-time">0:00</span>
                     <input type="range" id="progress-bar" min="0" max="100" value="0" oninput="seekAudio()" class="w-full accent-indigo-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer">
                     <span id="total-time">0:00</span>
                 </div>
 
-                <!-- Media Action Row Controls -->
+                <!-- Media Track Action Controls -->
                 <div class="flex items-center gap-6 text-xl">
                     <button onclick="prevTrack()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-backward-step"></i></button>
                     <button onclick="togglePlay()" id="play-btn" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 text-2xl">
@@ -104,7 +83,7 @@
                     <span class="text-xs bg-indigo-900/60 text-indigo-300 font-medium px-2 py-0.5 rounded-full border border-indigo-700/30">Hi-Res Active</span>
                 </div>
                 <div id="playlist-list" class="overflow-y-auto max-h-[180px] flex flex-col gap-1 dynamic-scroll pr-1">
-                    <!-- Playlist list items will be injected here automatically by Javascript -->
+                    <!-- Javascript lists populate here -->
                 </div>
             </div>
 
@@ -115,25 +94,6 @@
     <audio id="audio-engine" src=""></audio>
 
     <script>
-        // Authentication Validation Logic Code Block
-        function unlockApp() {
-            const codeInput = document.getElementById('passcode-input').value;
-            const errorBanner = document.getElementById('auth-error');
-            
-            if (codeInput === "1234") {
-                document.getElementById('auth-mod').classList.add('hidden-panel');
-                document.getElementById('main-app').classList.remove('hidden-panel');
-                initPlayer();
-            } else {
-                errorBanner.classList.remove('opacity-0');
-                errorBanner.classList.add('opacity-100');
-                setTimeout(() => {
-                    errorBanner.classList.remove('opacity-100');
-                    errorBanner.classList.add('opacity-0');
-                }, 3000);
-            }
-        }
-
         // Pre-configured Streaming Audio Array Database (Bypasses Browser CORS Restrictions)
         const musicCatalog = [
             { title: "High-Res Electronic Mix", artist: "Helix Premium Track 01", url: "https://soundhelix.com" },
@@ -148,10 +108,51 @@
         const playBtn = document.getElementById('play-btn');
         const progressBar = document.getElementById('progress-bar');
 
-        // Automatic Track Loader Interface Builder Loop
+        // Automatically fire the initialization sequence when the screen loads
+        window.onload = function() {
+            initPlayer();
+        };
+
         function initPlayer() {
             const listContainer = document.getElementById('playlist-list');
             listContainer.innerHTML = "";
             
             musicCatalog.forEach((track, index) => {
                 const trackRow = document.createElement('div');
+                trackRow.className = `flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-transparent hover:bg-slate-900/80 ${index === currentTrackIdx ? 'bg-indigo-950/40 border-indigo-900/60' : ''}`;
+                trackRow.setAttribute('onclick', `selectTrack(${index})`);
+                trackRow.id = `track-row-${index}`;
+                trackRow.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-500 font-mono w-4">${index + 1}</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200 ${index === currentTrackIdx ? 'text-indigo-400' : ''}">${track.title}</div>
+                            <div class="text-xs text-slate-500">${track.artist}</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500 uppercase font-mono tracking-widest bg-slate-900 px-2 py-0.5 rounded border border-slate-800">HQ</div>
+                `;
+                listContainer.appendChild(trackRow);
+            });
+            loadTrack(currentTrackIdx);
+        }
+
+        function loadTrack(idx) {
+            currentTrackIdx = idx;
+            const track = musicCatalog[idx];
+            audio.src = track.url;
+            document.getElementById('player-title').innerText = track.title;
+            document.getElementById('player-album').innerText = track.artist;
+            
+            musicCatalog.forEach((_, i) => {
+                const row = document.getElementById(`track-row-${i}`);
+                if(row) {
+                    if(i === idx) {
+                        row.className = "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-indigo-900/60 bg-indigo-950/40";
+                    } else {
+                        row.className = "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-transparent hover:bg-slate-900/80";
+                    }
+                }
+            });
+        }
+
