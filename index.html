@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NavyStream - Private Music Player</title>
-    <!-- Tailwind CSS Styling Engine -->
-    <script src="https://tailwindcss.com"></script>
-    <!-- FontAwesome Vector Icon Library -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Corrected Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Corrected FontAwesome Vector Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #0b1329; color: #ffffff; font-family: sans-serif; }
         .dynamic-scroll::-webkit-scrollbar { width: 4px; }
@@ -17,7 +17,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- MAIN CORE APPLICATION DASHBOARD (Instant Access - No Password Required) -->
+    <!-- MAIN CORE APPLICATION DASHBOARD -->
     <div id="main-app" class="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <!-- SIDE PANEL: EQUALIZER MODULES -->
@@ -70,7 +70,7 @@
                 <div class="flex items-center gap-6 text-xl">
                     <button onclick="prevTrack()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-backward-step"></i></button>
                     <button onclick="togglePlay()" id="play-btn" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 text-2xl">
-                        <i class="fa-solid fa-play ml-1"></i>
+                        <i class="fa-solid fa-play ml-1" id="play-icon"></i>
                     </button>
                     <button onclick="nextTrack()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-forward-step"></i></button>
                 </div>
@@ -86,7 +86,6 @@
                     <!-- Javascript lists populate here -->
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -94,21 +93,21 @@
     <audio id="audio-engine" src=""></audio>
 
     <script>
-        // Pre-configured Streaming Audio Array Database (Bypasses Browser CORS Restrictions)
+        // Updated to direct MP3 URLs for demonstration
         const musicCatalog = [
-            { title: "High-Res Electronic Mix", artist: "Helix Premium Track 01", url: "https://soundhelix.com" },
-            { title: "Synthetic Coding Focus", artist: "Helix Premium Track 02", url: "https://soundhelix.com" },
-            { title: "Midnight Ambient Chill", artist: "Helix Premium Track 03", url: "https://soundhelix.com" },
-            { title: "Deep Focus Studio Beats", artist: "Helix Premium Track 04", url: "https://soundhelix.com" }
+            { title: "High-Res Electronic Mix", artist: "Helix Premium Track 01", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+            { title: "Synthetic Coding Focus", artist: "Helix Premium Track 02", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+            { title: "Midnight Ambient Chill", artist: "Helix Premium Track 03", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+            { title: "Deep Focus Studio Beats", artist: "Helix Premium Track 04", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" }
         ];
 
         let currentTrackIdx = 0;
-        let isSeeking = false;
         const audio = document.getElementById('audio-engine');
-        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
         const progressBar = document.getElementById('progress-bar');
+        const currTimeEl = document.getElementById('curr-time');
+        const totalTimeEl = document.getElementById('total-time');
 
-        // Automatically fire the initialization sequence when the screen loads
         window.onload = function() {
             initPlayer();
         };
@@ -149,10 +148,70 @@
                 if(row) {
                     if(i === idx) {
                         row.className = "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-indigo-900/60 bg-indigo-950/40";
+                        row.querySelector('.font-semibold').classList.add('text-indigo-400');
                     } else {
                         row.className = "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-transparent hover:bg-slate-900/80";
+                        row.querySelector('.font-semibold').classList.remove('text-indigo-400');
                     }
                 }
             });
         }
 
+        // --- NEW JAVASCRIPT FUNCTIONS ADDED BELOW ---
+        
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.className = "fa-solid fa-pause";
+                playIcon.classList.remove('ml-1'); // centers pause icon better
+            } else {
+                audio.pause();
+                playIcon.className = "fa-solid fa-play ml-1";
+            }
+        }
+
+        function selectTrack(idx) {
+            loadTrack(idx);
+            audio.play();
+            playIcon.className = "fa-solid fa-pause";
+            playIcon.classList.remove('ml-1');
+        }
+
+        function nextTrack() {
+            let nextIdx = (currentTrackIdx + 1) % musicCatalog.length;
+            selectTrack(nextIdx);
+        }
+
+        function prevTrack() {
+            let prevIdx = (currentTrackIdx - 1 + musicCatalog.length) % musicCatalog.length;
+            selectTrack(prevIdx);
+        }
+
+        function seekAudio() {
+            let seekTo = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTo;
+        }
+
+        // Format time in minutes and seconds
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            let min = Math.floor(seconds / 60);
+            let sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // Update progress bar and timestamps as audio plays
+        audio.addEventListener('timeupdate', () => {
+            if (!isNaN(audio.duration)) {
+                let progress = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = progress;
+                currTimeEl.innerText = formatTime(audio.currentTime);
+                totalTimeEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        // Automatically play next track when current one ends
+        audio.addEventListener('ended', nextTrack);
+    </script>
+</body>
+</html>
